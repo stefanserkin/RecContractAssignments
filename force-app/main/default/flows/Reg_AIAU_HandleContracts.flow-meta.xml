@@ -4,7 +4,7 @@
     <assignments>
         <name>Add_Contract_to_Insert_List</name>
         <label>Add Contract to Insert List</label>
-        <locationX>138</locationX>
+        <locationX>270</locationX>
         <locationY>647</locationY>
         <assignmentItems>
             <assignToReference>contract.TREX1__Account__c</assignToReference>
@@ -150,10 +150,97 @@
             <targetReference>Loop_through_Required_Contracts</targetReference>
         </connector>
     </assignments>
+    <assignments>
+        <name>Add_Req_Sig_Contract_to_List</name>
+        <label>Add Req Sig Contract to List</label>
+        <locationX>138</locationX>
+        <locationY>1271</locationY>
+        <assignmentItems>
+            <assignToReference>reqSigContract.TREX1__Contract_and_Form__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_through_Req_Sig_Contracts.Id</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>reqSigContract.TREX1__Required_For_Activation__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_through_Req_Sig_Contracts.TREX1__Required_for_Activation__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>reqSigContract.TREX1__Registration__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Loop_through_Req_Sig_Contracts.TREX1__Registration__c</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>lstReqSigContractsToInsert</assignToReference>
+            <operator>Add</operator>
+            <value>
+                <elementReference>reqSigContract</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Loop_through_Req_Sig_Contracts</targetReference>
+        </connector>
+    </assignments>
+    <collectionProcessors>
+        <name>Filter_to_Req_Sig_Contracts</name>
+        <elementSubtype>FilterCollectionProcessor</elementSubtype>
+        <label>Filter to Req Sig Contracts</label>
+        <locationX>182</locationX>
+        <locationY>947</locationY>
+        <assignNextValueToReference>currentItem_Filter_to_Req_Sig_Contracts</assignNextValueToReference>
+        <collectionProcessorType>FilterCollectionProcessor</collectionProcessorType>
+        <collectionReference>lstContractsToInsert</collectionReference>
+        <conditionLogic>or</conditionLogic>
+        <conditions>
+            <leftValueReference>currentItem_Filter_to_Req_Sig_Contracts.TREX1__Required_for_Activation__c</leftValueReference>
+            <operator>EqualTo</operator>
+            <rightValue>
+                <booleanValue>true</booleanValue>
+            </rightValue>
+        </conditions>
+        <conditions>
+            <leftValueReference>currentItem_Filter_to_Req_Sig_Contracts.TREX1__Required_for_Transaction_Close__c</leftValueReference>
+            <operator>EqualTo</operator>
+            <rightValue>
+                <booleanValue>true</booleanValue>
+            </rightValue>
+        </conditions>
+        <connector>
+            <targetReference>Check_for_Req_Sig_Contracts</targetReference>
+        </connector>
+    </collectionProcessors>
+    <decisions>
+        <name>Check_for_Req_Sig_Contracts</name>
+        <label>Check for Req Sig Contracts</label>
+        <locationX>182</locationX>
+        <locationY>1055</locationY>
+        <defaultConnectorLabel>Req Sig Contracts Not Found</defaultConnectorLabel>
+        <rules>
+            <name>Got_Req_Sig_Contracts</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Filter_to_Req_Sig_Contracts</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Loop_through_Req_Sig_Contracts</targetReference>
+            </connector>
+            <label>Got Req Sig Contracts</label>
+        </rules>
+    </decisions>
     <decisions>
         <name>Check_Get_Required_Contracts</name>
         <label>Check Get Required Contracts</label>
-        <locationX>182</locationX>
+        <locationX>380</locationX>
         <locationY>431</locationY>
         <defaultConnectorLabel>Required Contracts Not Found</defaultConnectorLabel>
         <rules>
@@ -185,9 +272,23 @@
     <interviewLabel>Reg AIAU HandleContracts {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Reg AIAU HandleContracts</label>
     <loops>
+        <name>Loop_through_Req_Sig_Contracts</name>
+        <label>Loop through Req Sig Contracts</label>
+        <locationX>50</locationX>
+        <locationY>1163</locationY>
+        <collectionReference>Filter_to_Req_Sig_Contracts</collectionReference>
+        <iterationOrder>Asc</iterationOrder>
+        <nextValueConnector>
+            <targetReference>Add_Req_Sig_Contract_to_List</targetReference>
+        </nextValueConnector>
+        <noMoreValuesConnector>
+            <targetReference>Insert_Req_Sig_Contracts</targetReference>
+        </noMoreValuesConnector>
+    </loops>
+    <loops>
         <name>Loop_through_Required_Contracts</name>
         <label>Loop through Required Contracts</label>
-        <locationX>50</locationX>
+        <locationX>182</locationX>
         <locationY>539</locationY>
         <collectionReference>Get_Required_Contracts</collectionReference>
         <iterationOrder>Asc</iterationOrder>
@@ -220,14 +321,24 @@
     <recordCreates>
         <name>Insert_Contracts</name>
         <label>Insert Contracts</label>
-        <locationX>50</locationX>
+        <locationX>182</locationX>
         <locationY>839</locationY>
+        <connector>
+            <targetReference>Filter_to_Req_Sig_Contracts</targetReference>
+        </connector>
         <inputReference>lstContractsToInsert</inputReference>
+    </recordCreates>
+    <recordCreates>
+        <name>Insert_Req_Sig_Contracts</name>
+        <label>Insert Req Sig Contracts</label>
+        <locationX>50</locationX>
+        <locationY>1463</locationY>
+        <inputReference>lstReqSigContractsToInsert</inputReference>
     </recordCreates>
     <recordLookups>
         <name>Get_Required_Contracts</name>
         <label>Get Required Contracts</label>
-        <locationX>182</locationX>
+        <locationX>380</locationX>
         <locationY>323</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
@@ -248,7 +359,7 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
     <start>
-        <locationX>56</locationX>
+        <locationX>254</locationX>
         <locationY>0</locationY>
         <connector>
             <targetReference>Get_Required_Contracts</targetReference>
@@ -283,11 +394,35 @@
         <objectType>TREX1__Contract_and_Form__c</objectType>
     </variables>
     <variables>
+        <name>currentItem_Filter_to_Req_Sig_Contracts</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>TREX1__Contract_and_Form__c</objectType>
+    </variables>
+    <variables>
         <name>lstContractsToInsert</name>
         <dataType>SObject</dataType>
         <isCollection>true</isCollection>
         <isInput>false</isInput>
         <isOutput>false</isOutput>
         <objectType>TREX1__Contract_and_Form__c</objectType>
+    </variables>
+    <variables>
+        <name>lstReqSigContractsToInsert</name>
+        <dataType>SObject</dataType>
+        <isCollection>true</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>TREX1__Required_Signature_Contract__c</objectType>
+    </variables>
+    <variables>
+        <name>reqSigContract</name>
+        <dataType>SObject</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <objectType>TREX1__Required_Signature_Contract__c</objectType>
     </variables>
 </Flow>
